@@ -1,28 +1,54 @@
-#include <iostream>
-#include<bits/stdc++.h>
-using namespace std;
+import java.util.*;
+import java.io.*;
 
-vector<int> parents[10000];
-bool visited[10000];
-int poss[10000];
+public class S3_07_Friends {
+	public static void main(String [] args) throws IOException{
+		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+		short n = (short)(Short.parseShort(input.readLine())+1);
+		List<Short> [] nodes = new ArrayList[10000];
+		short [] dist = new short[10000];
+		for(int i = 1;i<=9999;i++) {
+			nodes[i] = new ArrayList<Short>();
+			dist[i] = Short.MAX_VALUE;
+		}
+		for(int i = 1;i<n;i++) {
+			String [] tokens = input.readLine().split(" ");
+			nodes[Short.parseShort(tokens[0])].add(Short.parseShort(tokens[1]));
+		}
+		String [] tokens = input.readLine().split(" ");
+		LinkedList<Short> q = new LinkedList<Short>();
+		while(tokens[0].charAt(0) != '0' && tokens[1].charAt(0) != '0') {
+			short src = Short.parseShort(tokens[0]);
+			short dest = Short.parseShort(tokens[1]);
+			dist[src] = 0;
+			q.push(src);
+			while(!q.isEmpty()) {
+				short currentnode = q.pop();
+				if(currentnode == dest) {
+					q.clear();
+					break;
+				}
+				else {
+					for(int i = 0;i<nodes[currentnode].size();i++) {
+						if(dist[nodes[currentnode].get(i)] > dist[currentnode] + 1) {
+							dist[nodes[currentnode].get(i)] = (short)(dist[currentnode] + 1);
+							q.add(nodes[currentnode].get(i));
+						}
+					}
+				}
+			}
+			if(dist[dest] == Short.MAX_VALUE) {
+				System.out.println("No");
+			}
+			else {
+				System.out.println("Yes " + (short)(dist[dest]-1));
+			}
+			for(int i = 1;i<=9999;i++) {
+				dist[i] = Short.MAX_VALUE;
+			}
+			tokens = input.readLine().split(" ");
+		}
+		input.close();
+	}
 
-void findprob(int current){
-  visited[current] = 1;
-  for(int i = 0;i<parents[current].size();i++){
-    if(visited[parents[current][i]] == 0){findprob(parents[current][i]);}
-    poss[current] += poss[parents[current][i]];
-  }
-}
-int main() {
-  int n;
-  scanf("%d", &n);
-  int src,dest;
-  scanf("%d%d", &src, &dest);
-  while(src != 0 && dest != 0){
-    parents[dest].push_back(src);
-    scanf("%d%d", &src, &dest);
-  }
-  poss[1] = 1;
-  findprob(n);
-  cout << poss[n] << endl;
 }
