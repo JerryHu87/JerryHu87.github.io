@@ -1,0 +1,103 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+#define ll long long int
+#define ld long double
+#define pii pair<int,int>
+#define pll pair<long long int,long long int>
+#define pb push_back;
+#define largestbit(x) 31-__builtin_clz(x);
+#define scan(x) do{while((x=getchar())<'0'); for(x-='0'; '0'<=(_=getchar()); x=(x<<3)+(x<<1)+_-'0');}while(0)
+char _;
+const int MOD = 1000000007;
+const int INF = 0x3f3f3f3f;
+long long gcd(long long a, long long b) {return b == 0 ? a : gcd(b, a % b);}
+long long fpow(long long  b, long long exp, long long mod){if(exp == 0) return 1;long long t = fpow(b,exp/2,mod);if(exp&1) return t*t%mod*b%mod;return t*t%mod;}
+long long divmod(long long i, long long j, long long mod){i%=mod,j%=mod;return i*fpow(j,mod-2,mod)%mod;}
+long long lcm(long long a, long long b){return a*b/gcd(a,b);}
+#define MAXN 5001
+
+int n,s;
+vector<int> adj[MAXN];
+int dis[MAXN],pa[MAXN];
+bool vis[MAXN],done[MAXN];
+priority_queue<pii,vector<pii> > pq;
+
+void dfs(int u,int p){
+	for(int e:adj[u]){
+		if(e != p){
+			dis[e] = dis[u]+1;
+			pa[e] = u;
+			dfs(e,u);
+		}
+	}
+}
+void enq(){
+	for(int i = 1;i<=n;i++){
+		if(adj[i].size() == 1){
+			done[i] = 1;
+			pq.push({dis[i],i});
+		}
+	}
+}
+int crawl(int u,int v){
+	if(v == 0){return u;}
+	return crawl(pa[u],v-1);
+}
+void fill(int u,int p,int v){
+	if(v == -1){return;}
+	vis[u] = 1;
+	for(int e:adj[u]){
+		if(e != p){fill(e,u,v-1);}
+	}
+}
+void reset(){
+	for(int i = 1;i<=n;i++){
+		vis[i] = 0;
+		done[i] = 0;
+	}
+}
+int main(){
+	cin.sync_with_stdio(0);cin.tie(0);
+	cin >> n >> s;
+	for(int i = 0,a,b;i<n-1;i++){
+		cin >> a >> b;
+		adj[a].push_back(b);
+		adj[b].push_back(a);
+	}
+	if(n == s){
+		cout << "0\n";
+		return 0;
+	}
+	dfs(1,1);
+	pa[1] = 1;
+	int lo = 1,hi = n,ans = INF;
+	while(lo<=hi){
+		int mid = (lo+hi)/2,cnt = 0;
+		reset();
+		enq();
+		while(!pq.empty()){
+			pii u = pq.top();pq.pop();
+			if(!vis[u.second]){
+				int temp = crawl(u.second,mid);
+				fill(temp,temp,mid);
+				cnt++;
+			}
+			for(int e:adj[u.second]){
+				if(!done[e]){
+					done[e] = 1;
+					pq.push({dis[e],e});
+				}
+			}
+		}
+		if(cnt > s){
+			lo = mid+1;
+		}
+		else{
+			hi = mid-1;
+			ans = min(ans,mid);
+		}
+	}
+	cout << ans << "\n";
+	return 0;
+}
