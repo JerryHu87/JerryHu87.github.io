@@ -1,0 +1,102 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+#define ll long long int
+#define pii pair<int,int>
+#define pll pair<long long int,long long int>
+#define pb push_back;
+#define largestbit(x) 31-__builtin_clz(x);
+#define scan(x) do{while((x=getchar())<'0'); for(x-='0'; '0'<=(_=getchar()); x=(x<<3)+(x<<1)+_-'0');}while(0)
+char _;
+const int MOD = 1000000007;
+const int INF = 0x3f3f3f3f;
+long long gcd(long long a, long long b) {return b == 0 ? a : gcd(b, a % b);}
+long long fpow(long long  b, long long exp, long long mod){if(exp == 0) return 1;long long t = fpow(b,exp/2,mod);if(exp&1) return t*t%mod*b%mod;return t*t%mod;}
+
+string grid[2001];
+ll tree[8001],psa[2001][5001],idx[2001],n,m,q;
+queue<pair<pll,ll> > Q;
+
+void swp(ll i1,ll i2){
+	ll temp = idx[i1];
+	idx[i1] = idx[i2];
+	idx[i2] = temp;
+}
+ll lcp(ll i1,ll i2){
+	ll lo = 1,hi = m,ma = 0;
+	while(lo<=hi){
+		ll mid = (lo+hi)/2;
+		if(psa[i1][mid] == psa[i2][mid]){
+			lo = mid+1;
+			ma = max(ma,mid);
+		}
+		else{
+			hi = mid-1;
+		}
+	}
+	return ma;
+}
+void build(ll cur,ll lo,ll hi){
+	if(lo == hi){
+		tree[cur] = m;
+	}
+	else{
+		ll mid = (lo+hi)/2;
+		build(cur*2,lo,mid);build(cur*2+1,mid+1,hi);
+		tree[cur] = min(lcp(idx[mid],idx[mid+1]),min(tree[cur*2],tree[cur*2+1]));
+	}
+}
+void update(ll cur,ll x,ll lo,ll hi){
+	if(!(lo == hi && hi == x)){
+		ll mid = (lo+hi)/2;
+		x <= mid ? update(cur*2,x,lo,mid):update(cur*2+1,x,mid+1,hi);
+		tree[cur] = min(lcp(idx[mid],idx[mid+1]),min(tree[cur*2],tree[cur*2+1]));
+	}
+}
+void query(ll cur,ll l,ll r,ll lo,ll hi){
+	if(l<=lo && hi<=r){
+ 		Q.push({{lo,hi},tree[cur]});
+ 		return;
+	}
+	else if(hi<l || r<lo){
+		return;
+	}
+	ll mid = (lo+hi)/2;
+	query(cur*2,l,r,lo,mid);query(cur*2+1,l,r,mid+1,hi);
+}
+void hsh(){
+	for(ll i = 1;i<=n;i++){
+		psa[i][1] = (ll)grid[i][0];
+		for(ll j = 2;j<=m;j++){
+			psa[i][j] = ((psa[i][j-1]*131)%MOD+grid[i][j-1])%MOD;
+		}
+	}
+}
+
+int main(){
+	//freopen("file.in","r",stdin); freopen("file.out","w",stdout);
+	cin.sync_with_stdio(0);cin.tie(0);
+	cin >> n >> m;
+	for(ll i = 1;i<=n;i++){
+		cin >> grid[i];
+		idx[i] = i;
+	}
+	hsh();
+	build(1,1,n);
+	cin >> q;
+	for(ll i = 0,a,b;i<q;i++){
+		cin >> a >> b;
+		query(1,a,b,1,n);
+		pair<pll,ll> cur = Q.front();Q.pop();
+		ll temp = cur.second;
+		while(!Q.empty()){
+			temp = min(min(temp,lcp(idx[cur.first.second],idx[Q.front().first.first])),min(cur.second,Q.front().second));
+			cur = Q.front();Q.pop();
+		}
+		cout << (b-a+1)*temp << "\n";
+		swp(a,b);
+		update(1,a,1,n);
+		update(1,b,1,n);
+	}
+	return 0;
+}
