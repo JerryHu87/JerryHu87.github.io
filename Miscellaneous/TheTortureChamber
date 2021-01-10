@@ -1,0 +1,58 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+#define ll long long int
+#define ull unsigned long long int
+#define ld long double
+#define pii pair<int,int>
+#define pll pair<long long int,long long int>
+#define pdd pair<long double, long double>
+#define pb push_back
+#define largestbit(x) 31-__builtin_clz(x);
+void scan(int &number){bool negative = false;register int c;number = 0;c = getchar();if (c=='-'){negative = true;c = getchar();}for(;(c>47&&c<58);c=getchar())number = number *10 + c - 48;if (negative)number *= -1;}
+int di_; string dnms_, co_ = ",";
+void debug_(){cout<<endl;}
+template<typename F, typename... R> void debug_(F &f, R&... r){while(dnms_[di_] != ',')cout<<dnms_[di_++];di_++;cout<<": "<<f<<",";debug_(r...);}
+#define debug(...) dnms_=#__VA_ARGS__+co_,di_=0,debug_(__VA_ARGS__)
+const int MOD = 1000000007;
+const int INF = 0x3f3f3f3f;
+const long double PI = 3.14159265359;
+long long gcd(long long a, long long b) {return b == 0 ? a : gcd(b, a % b);}
+long long fpow(long long  b, long long exp, long long mod){if(exp == 0) return 1;long long t = fpow(b,exp/2,mod);if(exp&1) return t*t%mod*b%mod;return t*t%mod;}
+long long divmod(long long i, long long j, long long mod){i%=mod,j%=mod;return i*fpow(j,mod-2,mod)%mod;}
+long long lcm(long long a, long long b){return a*b/gcd(a,b);}
+#define MAXN 200001
+
+bool sieve[MAXN],seg[MAXN*100];
+vector<ll> primes;
+ll n,m,ans;
+
+void init(){
+	for(ll i = 2;i<MAXN;i++){
+		if(sieve[i]){continue;}
+		primes.push_back(i);
+		//	if(i<1000)debug(i);
+		for(ll j = i*i;j<MAXN;j+=i){
+			sieve[j] = 1;
+		}
+	}
+}
+int main(){
+	init();
+	//freopen("file.in","r",stdin); freopen("file.out","w",stdout);
+	cin.sync_with_stdio(0);cin.tie(0);
+	//cout << setprecision(2);cout << fixed;
+	cin >> n >> m;
+	for(ll i = 0;i<(int)primes.size() && primes[i]*primes[i] <= m;i++){
+		for(ll j = (n/primes[i])*(primes[i]);j<=m;j+=primes[i]){
+			while(j < n || j == primes[i]){j += primes[i];}
+			seg[j-n] = 1;
+		}
+	}
+	for(ll i = 0;i<m-n;i++){
+		//if(!seg[i]){cout << i+n << "\n";}
+		ans += !seg[i];
+	}
+	cout << ans-(n == 1) << "\n";
+	return 0;
+}
